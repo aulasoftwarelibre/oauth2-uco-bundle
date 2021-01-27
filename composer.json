@@ -1,0 +1,28 @@
+{
+    "name": "informaticauco/oauth2-uco-bundle",
+    "description": "University of Córdoba client provider to the PHP League OAuth2 client",
+    "type": "symfony-bundle",
+    "license": "AGPL-3.0-or-later",
+    "authors": [
+        {
+            "name": "Sergio Gómez",
+            "email": "sergio@uco.es"
+        }
+    ],
+    "autoload": {
+        "psr-4": {
+            "Uco\\OAuth2\\ClientBundle\\": "src/"
+        }
+    },
+    "require": {
+        "knpuniversity/oauth2-client-bundle": "^2.7",
+        "informaticauco/oauth2-uco": "^0.5.1",
+        "symfony/security-http": "^5.2",
+        "symfony/doctrine-bridge": "^5.2",
+        "symfony/messenger": "^5.2"
+    },
+    "require-dev": {
+        "roave/security-advisories": "dev-master",
+        "friendsofphp/php-cs-fixer": "^2.18"
+    }
+}

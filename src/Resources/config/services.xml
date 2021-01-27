@@ -1,0 +1,23 @@
+<?xml version="1.0" ?>
+
+<container xmlns="http://symfony.com/schema/dic/services"
+           xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+           xsi:schemaLocation="http://symfony.com/schema/dic/services http://symfony.com/schema/dic/services/services-1.0.xsd">
+
+    <services>
+        <service class="Uco\OAuth2\ClientBundle\Security\Guard\UcoAuthenticator" id="uco_oauth2_client.security_guard.uco_authenticator">
+            <argument type="service" id="knpu.oauth2.registry"/>
+            <argument type="service" id="router" />
+            <argument type="service" id="messenger.default_bus"/>
+        </service>
+
+        <service class="Uco\OAuth2\ClientBundle\Controller\SecurityController" id="uco_oauth2_client.controller.security_controller" public="true">
+            <argument type="service" id="knpu.oauth2.registry" />
+            <call method="setContainer">
+                <argument type="service" id="service_container" />
+            </call>
+        </service>
+
+        <service id="Uco\OAuth2\ClientBundle\Controller\SecurityController" alias="uco_oauth2_client.controller.security_controller" public="true" />
+    </services>
+</container>
