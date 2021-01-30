@@ -1,6 +1,6 @@
 {
     "name": "informaticauco/oauth2-uco-bundle",
-    "description": "University of Córdoba client provider to the PHP League OAuth2 client",
+    "description": "Symfony authentication bundle to use with University of Cordoba OP",
     "type": "symfony-bundle",
     "license": "AGPL-3.0-or-later",
     "authors": [
