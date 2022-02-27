@@ -4,10 +4,10 @@
            xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
            xsi:schemaLocation="http://symfony.com/schema/routing http://symfony.com/schema/routing/routing-1.0.xsd">
     <route id="connect_uco_check" path="/connect/uco/check" methods="GET">
-        <default key="_controller">uco_oauth2_client.controller.security_controller:check</default>
+        <default key="_controller">uco_oauth2_client.controller.security_controller::check</default>
     </route>
 
     <route id="connect_uco_start" path="/connect/uco" methods="GET">
-        <default key="_controller">uco_oauth2_client.controller.security_controller:start</default>
+        <default key="_controller">uco_oauth2_client.controller.security_controller::start</default>
     </route>
 </routes>
