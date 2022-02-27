@@ -1,5 +1,5 @@
 {
-    "name": "informaticauco/oauth2-uco-bundle",
+    "name": "aulasoftwarelibre/oauth2-uco-bundle",
     "description": "Symfony authentication bundle to use with University of Cordoba OP",
     "type": "symfony-bundle",
     "license": "AGPL-3.0-or-later",
