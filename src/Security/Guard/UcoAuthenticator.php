@@ -3,17 +3,15 @@
 declare(strict_types=1);
 
 /*
- * This file is part of the `informaticauco/oauth2-client-bundle`.
+ * This file is part of the `aulasoftwarelibre/oauth2-client-bundle`.
  *
- * Copyright (C) 2021 by Sergio Gómez <sergio@uco.es>
- *
- * This code was developed by Universidad de Córdoba (UCO https://www.uco.es)
+ * Copyright (C) 2022 by Sergio Gómez <sergio@uco.es>
  *
  * For the full copyright and license information, please view the LICENSE
  * file that was distributed with this source code.
  */
 
-namespace Uco\OAuth2\ClientBundle\Security\Guard;
+namespace AulaSoftwareLibre\OAuth2\ClientBundle\Security\Guard;
 
 use KnpU\OAuth2ClientBundle\Client\ClientRegistry;
 use KnpU\OAuth2ClientBundle\Client\OAuth2ClientInterface;
@@ -32,8 +30,8 @@ use Symfony\Component\Security\Core\Exception\UsernameNotFoundException;
 use Symfony\Component\Security\Core\User\UserInterface;
 use Symfony\Component\Security\Core\User\UserProviderInterface;
 use Symfony\Component\Security\Http\Util\TargetPathTrait;
-use Uco\OAuth2\Client\Provider\UcoResourceOwner;
-use Uco\OAuth2\ClientBundle\Message\AddUserMessage;
+use AulaSoftwareLibre\OAuth2\Client\Provider\UcoResourceOwner;
+use AulaSoftwareLibre\OAuth2\ClientBundle\Message\AddUserMessage;
 
 class UcoAuthenticator extends SocialAuthenticator
 {
