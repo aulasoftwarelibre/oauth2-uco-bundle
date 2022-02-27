@@ -13,9 +13,9 @@ declare(strict_types=1);
 
 namespace AulaSoftwareLibre\OAuth2\ClientBundle;
 
+use AulaSoftwareLibre\OAuth2\ClientBundle\DependencyInjection\UcoOAuth2ClientExtension;
 use Symfony\Component\DependencyInjection\Extension\ExtensionInterface;
 use Symfony\Component\HttpKernel\Bundle\Bundle;
-use AulaSoftwareLibre\OAuth2\ClientBundle\DependencyInjection\UcoOAuth2ClientExtension;
 
 final class UcoOAuth2ClientBundle extends Bundle
 {

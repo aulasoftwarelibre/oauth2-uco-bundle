@@ -42,9 +42,10 @@ class UcoAuthenticator extends OAuth2Authenticator
     public function __construct(
         private ClientRegistry $clientRegistry,
         private RouterInterface $router,
-        private MessageBusInterface $messageBus,
-        private UserProviderInterface $userProvider
+        private UserProviderInterface $userProvider,
+        MessageBusInterface $messageBus,
     ) {
+        $this->messageBus = $messageBus;
     }
 
     /**
