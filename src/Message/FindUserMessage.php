@@ -13,7 +13,7 @@ declare(strict_types=1);
 
 namespace AulaSoftwareLibre\OAuth2\ClientBundle\Message;
 
-class AddUserMessage
+class FindUserMessage
 {
     private string $username;
 

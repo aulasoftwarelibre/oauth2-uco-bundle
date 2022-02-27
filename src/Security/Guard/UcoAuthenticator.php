@@ -13,7 +13,7 @@ declare(strict_types=1);
 
 namespace AulaSoftwareLibre\OAuth2\ClientBundle\Security\Guard;
 
-use AulaSoftwareLibre\OAuth2\ClientBundle\Message\AddUserMessage;
+use AulaSoftwareLibre\OAuth2\ClientBundle\Message\FindUserMessage;
 use KnpU\OAuth2ClientBundle\Client\ClientRegistry;
 use KnpU\OAuth2ClientBundle\Security\Authenticator\OAuth2Authenticator;
 use Symfony\Component\HttpFoundation\RedirectResponse;
@@ -26,9 +26,7 @@ use Symfony\Component\Messenger\MessageBusInterface;
 use Symfony\Component\Routing\RouterInterface;
 use Symfony\Component\Security\Core\Authentication\Token\TokenInterface;
 use Symfony\Component\Security\Core\Exception\AuthenticationException;
-use Symfony\Component\Security\Core\Exception\UsernameNotFoundException;
 use Symfony\Component\Security\Core\User\UserInterface;
-use Symfony\Component\Security\Core\User\UserProviderInterface;
 use Symfony\Component\Security\Http\Authenticator\Passport\Badge\UserBadge;
 use Symfony\Component\Security\Http\Authenticator\Passport\Passport;
 use Symfony\Component\Security\Http\Authenticator\Passport\SelfValidatingPassport;
@@ -42,7 +40,6 @@ class UcoAuthenticator extends OAuth2Authenticator
     public function __construct(
         private ClientRegistry $clientRegistry,
         private RouterInterface $router,
-        private UserProviderInterface $userProvider,
         MessageBusInterface $messageBus,
     ) {
         $this->messageBus = $messageBus;
@@ -69,13 +66,7 @@ class UcoAuthenticator extends OAuth2Authenticator
                 $userFromToken = $client->fetchUserFromToken($accessToken);
                 $userResourceId = $userFromToken->getId();
 
-                try {
-                    $user = $this->userProvider->loadUserByUsername($userResourceId);
-                } catch (UsernameNotFoundException $e) {
-                    $user = $this->createUser($userResourceId);
-                }
-
-                return $user;
+                return $this->findUser($userResourceId);
             })
         );
     }
@@ -108,10 +99,10 @@ class UcoAuthenticator extends OAuth2Authenticator
         return new RedirectResponse($targetPath);
     }
 
-    private function createUser(string $userResourceId): UserInterface
+    private function findUser(string $userResourceId): UserInterface
     {
         try {
-            $user = $this->handle(new AddUserMessage($userResourceId));
+            $user = $this->handle(new FindUserMessage($userResourceId));
         } catch (HandlerFailedException $e) {
             while ($e instanceof HandlerFailedException) {
                 $e = $e->getPrevious();
