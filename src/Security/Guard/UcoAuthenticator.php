@@ -13,9 +13,9 @@ declare(strict_types=1);
 
 namespace AulaSoftwareLibre\OAuth2\ClientBundle\Security\Guard;
 
+use AulaSoftwareLibre\OAuth2\ClientBundle\Message\AddUserMessage;
 use KnpU\OAuth2ClientBundle\Client\ClientRegistry;
-use KnpU\OAuth2ClientBundle\Client\OAuth2ClientInterface;
-use KnpU\OAuth2ClientBundle\Security\Authenticator\SocialAuthenticator;
+use KnpU\OAuth2ClientBundle\Security\Authenticator\OAuth2Authenticator;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -29,32 +29,28 @@ use Symfony\Component\Security\Core\Exception\AuthenticationException;
 use Symfony\Component\Security\Core\Exception\UsernameNotFoundException;
 use Symfony\Component\Security\Core\User\UserInterface;
 use Symfony\Component\Security\Core\User\UserProviderInterface;
+use Symfony\Component\Security\Http\Authenticator\Passport\Badge\UserBadge;
+use Symfony\Component\Security\Http\Authenticator\Passport\Passport;
+use Symfony\Component\Security\Http\Authenticator\Passport\SelfValidatingPassport;
 use Symfony\Component\Security\Http\Util\TargetPathTrait;
-use AulaSoftwareLibre\OAuth2\Client\Provider\UcoResourceOwner;
-use AulaSoftwareLibre\OAuth2\ClientBundle\Message\AddUserMessage;
 
-class UcoAuthenticator extends SocialAuthenticator
+class UcoAuthenticator extends OAuth2Authenticator
 {
     use HandleTrait;
     use TargetPathTrait;
 
-    private ClientRegistry $clientRegistry;
-    private RouterInterface $router;
-
     public function __construct(
-        ClientRegistry $clientRegistry,
-        RouterInterface $router,
-        MessageBusInterface $messageBus
+        private ClientRegistry $clientRegistry,
+        private RouterInterface $router,
+        private MessageBusInterface $messageBus,
+        private UserProviderInterface $userProvider
     ) {
-        $this->clientRegistry = $clientRegistry;
-        $this->router = $router;
-        $this->messageBus = $messageBus;
     }
 
     /**
      * {@inheritdoc}
      */
-    public function supports(Request $request)
+    public function supports(Request $request): ?bool
     {
         return 'connect_uco_check' === $request->attributes->get('_route');
     }
@@ -62,35 +58,31 @@ class UcoAuthenticator extends SocialAuthenticator
     /**
      * {@inheritdoc}
      */
-    public function getCredentials(Request $request)
+    public function authenticate(Request $request): Passport
     {
-        return $this->fetchAccessToken($this->getClient());
+        $client = $this->clientRegistry->getClient('uco');
+        $accessToken = $this->fetchAccessToken($client);
+
+        return new SelfValidatingPassport(
+            new UserBadge($accessToken->getToken(), function () use ($accessToken, $client) {
+                $userFromToken = $client->fetchUserFromToken($accessToken);
+                $userResourceId = $userFromToken->getId();
+
+                try {
+                    $user = $this->userProvider->loadUserByUsername($userResourceId);
+                } catch (UsernameNotFoundException $e) {
+                    $user = $this->createUser($userResourceId);
+                }
+
+                return $user;
+            })
+        );
     }
 
     /**
      * {@inheritdoc}
      */
-    public function getUser($credentials, UserProviderInterface $userProvider)
-    {
-        $userResource = $this
-            ->getClient()
-            ->fetchUserFromToken($credentials);
-        \assert($userResource instanceof UcoResourceOwner);
-        $userResourceId = $userResource->getId();
-
-        try {
-            $user = $userProvider->loadUserByUsername($userResourceId);
-        } catch (UsernameNotFoundException $e) {
-            $user = $this->createUser($userResourceId);
-        }
-
-        return $user;
-    }
-
-    /**
-     * {@inheritdoc}
-     */
-    public function onAuthenticationFailure(Request $request, AuthenticationException $exception)
+    public function onAuthenticationFailure(Request $request, AuthenticationException $exception): ?Response
     {
         $message = strtr($exception->getMessageKey(), $exception->getMessageData());
 
@@ -100,37 +92,19 @@ class UcoAuthenticator extends SocialAuthenticator
     /**
      * {@inheritdoc}
      */
-    public function onAuthenticationSuccess(Request $request, TokenInterface $token, $providerKey)
+    public function onAuthenticationSuccess(Request $request, TokenInterface $token, string $firewallName): ?Response
     {
         $homepagePath = $this->router->generate('homepage');
         if (!$request->getSession() instanceof Session) {
             return new RedirectResponse($homepagePath);
         }
 
-        $targetPath = $this->getTargetPath($request->getSession(), $providerKey);
+        $targetPath = $this->getTargetPath($request->getSession(), $firewallName);
         if (!$targetPath) {
             return new RedirectResponse($homepagePath);
         }
 
         return new RedirectResponse($targetPath);
-    }
-
-    /**
-     * {@inheritdoc}
-     */
-    public function start(Request $request, ?AuthenticationException $authException = null)
-    {
-        return new RedirectResponse(
-            $this->router->generate('connect_uco_start'),
-            Response::HTTP_TEMPORARY_REDIRECT
-        );
-    }
-
-    private function getClient(): OAuth2ClientInterface
-    {
-        return $this
-            ->clientRegistry
-            ->getClient('uco');
     }
 
     private function createUser(string $userResourceId): UserInterface

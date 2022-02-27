@@ -48,11 +48,12 @@ final class SecurityController extends AbstractController
     private function storeTargetPath(Request $request): void
     {
         $targetPath = $request->query->get('_target_path');
-        $session = $request->getSession();
 
-        if (!$targetPath || !$session instanceof SessionInterface || !$request->hasSession()) {
+        if (!$targetPath || !$request->hasSession()) {
             return;
         }
+
+        $session = $request->getSession();
 
         $this->saveTargetPath($session, 'main', $targetPath);
     }
