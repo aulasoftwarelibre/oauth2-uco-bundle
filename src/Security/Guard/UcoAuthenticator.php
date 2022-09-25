@@ -30,9 +30,10 @@ use Symfony\Component\Security\Core\User\UserInterface;
 use Symfony\Component\Security\Http\Authenticator\Passport\Badge\UserBadge;
 use Symfony\Component\Security\Http\Authenticator\Passport\Passport;
 use Symfony\Component\Security\Http\Authenticator\Passport\SelfValidatingPassport;
+use Symfony\Component\Security\Http\EntryPoint\AuthenticationEntryPointInterface;
 use Symfony\Component\Security\Http\Util\TargetPathTrait;
 
-class UcoAuthenticator extends OAuth2Authenticator
+class UcoAuthenticator extends OAuth2Authenticator implements AuthenticationEntryPointInterface
 {
     use HandleTrait;
     use TargetPathTrait;
@@ -44,6 +45,19 @@ class UcoAuthenticator extends OAuth2Authenticator
     ) {
         $this->messageBus = $messageBus;
     }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function start(Request $request, AuthenticationException $authException = null)
+    {
+        return new RedirectResponse(
+            $this->router->generate('connect_uco_start'),
+            Response::HTTP_TEMPORARY_REDIRECT,
+        );
+    }
+
+
 
     /**
      * {@inheritdoc}
