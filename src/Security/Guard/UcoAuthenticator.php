@@ -49,7 +49,7 @@ class UcoAuthenticator extends OAuth2Authenticator implements AuthenticationEntr
     /**
      * {@inheritdoc}
      */
-    public function start(Request $request, AuthenticationException $authException = null)
+    public function start(Request $request, AuthenticationException $authException = null): Response
     {
         return new RedirectResponse(
             $this->router->generate('connect_uco_start'),
